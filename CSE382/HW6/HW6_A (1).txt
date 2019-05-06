@@ -1,0 +1,136 @@
+#include <iostream>
+#include <vector>
+#include <fstream>
+
+using namespace std;
+
+void merge_sort(vector<int> &vec1);
+void merge_sort2(vector<int> &vec1);
+void merge(vector<int> &vec, int left, int mid, int right);
+
+int main() {
+	int size;
+	ofstream myfile;
+	ofstream myfile2;
+	myfile.open("Vector Numbers1.txt");
+	myfile2.open("Vector Numbers2.txt");
+
+	cout << "What is the size of your vector (Power of 2's ONlY)?" << endl;
+	cin >> size;
+
+	vector<int> vec1(size);
+
+	int x = 0;
+	while (x != size) {
+		vec1[x] = rand();
+		x++;
+	}
+
+	merge_sort(vec1);
+
+	for (int i = 0; i < vec1.size(); i++) {
+		myfile << vec1[i] << endl;;
+	}
+
+	cout << "Sort Complete" << endl;
+
+	cout << "What is the size of your vector (Any Number of Sets)?" << endl;
+	cin >> size;
+
+	vector<int> vec2(size);
+
+	int y = 0;
+	while (y != size) {
+		vec2[y] = rand();
+		y++;
+	}
+
+	merge_sort2(vec2);
+
+	for (int i = 0; i < vec2.size(); i++) {
+		myfile2 << vec2[i] << endl;;
+	}
+
+	cout << "Sort Complete" << endl;
+
+	getchar();
+	getchar();
+	return 0;
+}
+
+//merge sort for only powers of 2
+void merge_sort(vector<int> &vec1) {
+	int left, mid, right;
+	left = mid = right = 0;
+
+	for (int x = 1; x <= vec1.size()/2; x *= 2) { //determines mid subtracted by left
+												  //this tells us how many times we need to iterate
+												  //determines the number of values we need to compare in each section
+		left = 0;
+		for (int y = (x * 2); y <= vec1.size(); y += (x*2)) { // determines right subtracted by left
+															  //determines the number of sections we go through for an entire vector
+			mid = left + x;
+			right = left + (x*2);
+			merge(vec1, left, mid, right);
+			left = right;
+		}
+	}
+}
+
+//Extra Credit
+//Merge sort for any set of numbers
+void merge_sort2(vector<int> &vec1) {
+	int left, mid, right;
+	left = mid = right = 0;
+
+	for (int x = 1; x <= vec1.size() / 2; x *= 2) { //determines mid subtracted by left
+													//this tells us how many times we need to iterate
+													//determines the number of values we need to compare in each section
+		left = 0;
+		for (int y = (x * 2); y <= vec1.size(); y += (x * 2)) { // determines right subtracted by left
+																//determines the number of sections we go through for an entire vector
+			mid = left + x;
+			right = left + (x * 2);
+			merge(vec1, left, mid, right);			
+			left = right;
+		}
+		if (vec1.size() > right) { //whatever is left over by the initial merge sort is sorted
+			int n_end = vec1.size();
+			int n_mid = (right + n_end) / 2 + 1;
+			merge(vec1, right, n_mid, n_end);
+		}
+	}
+	if (vec1.size() > right) { //the initial merge and the left over merge is merged together
+		int n_end = vec1.size();
+		int n_mid = right;
+		merge(vec1, 0, n_mid, n_end);
+	}
+}
+void merge(vector<int> &vec, int left, int mid, int right) {
+	vector<int> temp;
+	int ogleft = left;
+	int ogright = right;
+	int ogmid = mid;
+
+	while (left < ogmid || mid < right) {
+		if (left == ogmid) { //left is equal to ogmid, pushes back mid to temp
+			temp.push_back(vec[mid]);
+			mid++;
+		}
+		else if (mid == right) { //mid is equal to right, pushes back left
+			temp.push_back(vec[left]);
+			left++;
+		}
+		else if (vec[left] < vec[mid]) { //value of left is greater than value at mid
+			temp.push_back(vec[left]);
+			left++;
+		}
+		else if (vec[mid] <= vec[left]) { //value of mid is greater than value at left
+			temp.push_back(vec[mid]);
+			mid++;
+		}
+	}
+	for (int x = ogleft; x < ogright; x++) { //changes the values atthe boundaries
+		vec[x] = temp[x - ogleft];
+	}
+}

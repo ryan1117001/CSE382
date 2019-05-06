@@ -1,0 +1,80 @@
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <queue>
+
+using namespace std;
+class e_node { //stands for edge node
+public:
+	int nb;//the neighbor of a currently considered node
+	int weight; //weight of the edge to the above neighbor
+	e_node() { nb = 0; weight = 0; }//constructor
+};
+
+class h_node {
+public:
+	int checked; //whether node is checked;
+	vector<e_node> edge;
+	h_node() { vector<e_node> edge; checked = 0; }
+};
+
+queue<int> top_sort(vector<h_node> &graph);
+
+int main() {
+	ifstream in("text3.txt");
+	int n, e; //n: num of nodes ; e: num of edges
+	in >> n >> e;
+	vector<h_node> graph(n);
+	e_node e1;
+	h_node h1;
+	int n1, n2, w;
+	for (int i = 0; i < e; i++) {
+		in >> n1 >> n2 >> w; //n1 = where it comes from, n2 = where it is currently, w = how much it costs
+		e1.nb = n2;
+		e1.weight = w;
+		graph[n1].edge.push_back(e1);
+	}
+	queue<int> queue1 = top_sort(graph);
+
+	while (!queue1.empty()) {
+		cout << queue1.front() << " ";
+		queue1.pop();
+	}
+	cout << endl;
+
+	getchar();
+	getchar();
+	return 0;
+}
+
+queue<int> top_sort(vector<h_node> &graph) {
+	queue<int> queue1;
+
+	int counter = 0; //counts the number of nodes gone through;
+	while (counter != graph.size()) {
+		int position = -1; //position where size == 0 and not checked
+		for (int x = 0; x < graph.size(); x++) {
+			if (graph[x].checked != 1 && graph[x].edge.size() == 0) position = x;
+		}
+		if (position == -1) { // if it can't find a position while counter != graph.size(),
+		//it means the the graph is cyclic
+			cout << "This graph is cyclic and cannot continue" << endl;
+			queue<int> queue2; //returns empty queue
+			return queue2;
+		}
+		graph[position].checked = 1;
+		queue1.push(position);
+
+		//delete the edges connected to one with size 0
+		for (int x = 0; x < graph.size(); x++) {
+			for (int y = graph[x].edge.size() - 1; y >= 0; y--) {
+				e_node temp;
+				if (graph[x].edge[y].nb == position) { 
+					graph[x].edge.erase(graph[x].edge.begin()+ y); //erase and automatically reconnects
+				}
+			}
+		}
+		counter++;
+	}
+	return queue1;
+}
